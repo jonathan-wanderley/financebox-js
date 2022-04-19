@@ -14,8 +14,7 @@ module.exports = {
         try {
             const data = jwt.verify(token, process.env.JWT_SECRET);
             const { id } = data;
-            req.userID = id
-            console.log('Passando');
+            req.userId = id
             return next();
         }
         catch (error) {

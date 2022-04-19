@@ -11,10 +11,10 @@ router.post('/signin', AuthController.signin);
 //Transactions
 router.get('/transactions', Auth.private, TransactionController.getTransactions);
 
-router.post('/transactions', TransactionController.addTransaction);
+router.post('/transactions', Auth.private, TransactionController.addTransaction);
 
-router.put('/transactions/:id', TransactionController.editTransaction);
+router.put('/transactions/:id', Auth.private, TransactionController.editTransaction);
 
-router.delete('/transactions/:id', TransactionController.removeTransaction);
+router.delete('/transactions/:id', Auth.private, TransactionController.removeTransaction);
 
 module.exports = router;

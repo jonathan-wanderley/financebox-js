@@ -18,7 +18,7 @@ module.exports = {
             return res.status(409).json({error:{email:{ msg:"Incorrect email and/or password"}}});
         }
 
-        const token = jwt.sign({ id: userFoundByEmail.id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ id: userFoundByEmail.id }, process.env.JWT_SECRET, { expiresIn: '3d' });
 
         res.json({ token });
     },
@@ -38,7 +38,7 @@ module.exports = {
             password: passwordHash
         });
 
-        const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '3d' });
 
         res.status(201).json({ token });
     }
