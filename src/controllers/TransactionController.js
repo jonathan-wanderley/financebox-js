@@ -1,7 +1,14 @@
 require('dotenv').config();
-const sequelize = require('../database/db');
 const Transaction = require('../models/Transaction');
-const User = require('../models/User');
+const { validationResult, matchedData } = require('express-validator');
+
+const customValidationResult = validationResult.withDefaults({
+    formatter: error => {
+        return {
+            msg: error.msg
+        }
+    }
+})
 
 module.exports = {
     getTransactions: async (req, res) => {
@@ -9,10 +16,16 @@ module.exports = {
             where: { userid: req.userId },
             attributes: ['id', 'name', 'value', 'date']
         })
-        res.json({ transactions });
+        res.json({ your_transactions: transactions });
     },
     addTransaction: async (req, res) => {
-        const { name, value, date} = req.body;
+        const errors = customValidationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).json({error: errors.mapped()});
+        }
+
+        const data = matchedData(req);
+        const { name, value, date} = data;
 
         if(!name || !value || !date) {
             return res.status(400).json({error: "Incomplete or invalid data"})
@@ -24,10 +37,23 @@ module.exports = {
             date: date,
             userid: req.userId
         });
-        return res.status(201).json({ newTransaction: newTransaction });
+        return res.status(201).json({
+            new_transaction: {
+                id: newTransaction.id,
+                name: newTransaction.name,
+                value: newTransaction.value,
+                date: newTransaction.date
+            }
+        });
     },
     editTransaction: async (req, res) => {
-        const { name, value, date } = req.body;
+        const errors = customValidationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).json({error: errors.mapped()});
+        }
+
+        const data = matchedData(req);
+        const { name, value, date } = data;
         const { id } = req.params;
 
         if(!id) {
@@ -42,13 +68,17 @@ module.exports = {
             return res.status(401).json({error: "You are not allowed to change this transaction"});
         };
 
+        if(!name && !value && !date) {
+            return res.status(400).json({error: "You sent empty data"});
+        }
+
         if(name) { transaction.name = name }
         if(value) { transaction.value = value }
         if(date) { transaction.date = date }
 
         await transaction.save();
 
-        res.json({ msg: "Successfully updated" })
+        return res.json({ msg: "Successfully updated" })
     },
     removeTransaction: async (req, res) => {
         const { id } = req.params;
@@ -66,6 +96,6 @@ module.exports = {
         };
 
         await transaction.destroy();
-        res.json({})
+        res.json({ msg: "Successfully deleted" })
     }
 }

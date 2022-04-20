@@ -1,14 +1,28 @@
 require('dotenv').config();
-
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { validationResult, matchedData } = require('express-validator');
+
+const customValidationResult = validationResult.withDefaults({
+    formatter: error => {
+        return {
+            msg: error.msg
+        }
+    }
+})
 
 module.exports = {
     signin: async (req, res) => {
-        const { email, password } = req.body;
+        const errors = customValidationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).json({error: errors.mapped()});
+        }
 
-        const userFoundByEmail = await User.findOne({email: email});
+        const data = matchedData(req);
+        const { email, password } = data;
+
+        const userFoundByEmail = await User.findOne({where: { email: email }});
         if(!userFoundByEmail) {
             return res.status(409).json({error:{email:{ msg:"Incorrect email and/or password"}}});
         }
@@ -23,7 +37,14 @@ module.exports = {
         res.json({ token });
     },
     signup: async (req, res) => {
-        const { name, email, password } = req.body;
+
+        const errors = customValidationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(409).json({error: errors.mapped()}); 
+        }
+
+        const data = matchedData(req);
+        const { name, email, password } = data;
 
         const userFoundByEmail = await User.findOne({ where: { email: email } });
         if(userFoundByEmail) {
