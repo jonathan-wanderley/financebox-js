@@ -3,8 +3,7 @@ const database = require('../database/db')
 
 const Transaction = database.define('transaction', {
     id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
+        type: "varchar(36)",
         allowNull: false,
         primaryKey: true
     },
@@ -17,7 +16,7 @@ const Transaction = database.define('transaction', {
         allowNull: false
     },
     date: {
-        type: Sequelize.DATEONLY,
+        type: Sequelize.DATE,
         allowNull: false
     },
     userid: {

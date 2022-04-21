@@ -1,6 +1,7 @@
 require('dotenv').config();
 const Transaction = require('../models/Transaction');
 const { validationResult, matchedData } = require('express-validator');
+const { v4: uuid } = require('uuid');
 
 const customValidationResult = validationResult.withDefaults({
     formatter: error => {
@@ -12,11 +13,24 @@ const customValidationResult = validationResult.withDefaults({
 
 module.exports = {
     getTransactions: async (req, res) => {
+        const { sort: queryOrder } = req.query
+        let orderType;
+        if(queryOrder && queryOrder.toLowerCase() == "asc") {
+            orderType = "ASC";
+        } else {
+            orderType = "DESC";
+        }
+
         const transactions = await Transaction.findAll({
             where: { userid: req.userId },
-            attributes: ['id', 'name', 'value', 'date']
+            attributes: ['id', 'name', 'value', 'date'],
+            order: [ ['date', orderType] ]
         })
-        res.json({ your_transactions: transactions });
+        
+        res.json({
+            user_name: req.userName,
+            user_transactions: transactions
+        });
     },
     addTransaction: async (req, res) => {
         const errors = customValidationResult(req);
@@ -32,6 +46,7 @@ module.exports = {
          }
 
         const newTransaction = await Transaction.create({
+            id: uuid(),
             name: name,
             value: value,
             date: date,

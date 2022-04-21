@@ -12,8 +12,9 @@ module.exports = {
 
         try {
             const data = jwt.verify(token, process.env.JWT_SECRET);
-            const { id } = data;
+            const { id, name } = data;
             req.userId = id
+            req.userName = name
             return next();
         }
         catch (error) {
