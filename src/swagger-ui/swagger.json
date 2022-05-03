@@ -1,0 +1,575 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "FinanceBox API",
+        "description": "Um sistema de organização de finanças",
+        "termsOfService": "http://localhost:3000/terms",
+        "contact": {
+            "email": "jonathan.wpc@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000/",
+            "description": "FinanceBox API"
+        }
+    ],
+    "paths": {
+        "/signin": {
+            "post": {
+                "summary": "User login",
+                "description": "This route is responsible for login users",
+                "tags": [
+                    "Authentication"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/signin"
+                            },
+                            "example": {
+                                "value": {
+                                    "email": "user@mail.com",
+                                    "password": "password123"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad request because invalid characters were entered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/error_obj"
+                                },
+                                "example": {
+                                    "error": {
+                                        "name": {
+                                            "msg": "Invalid name, only letters are allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "If the email and/or password is incorrect the server will return unauthorized status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/error_obj"
+                                },
+                                "example": {
+                                    "error": {
+                                        "login": {
+                                            "msg": "Incorrect email and/or password"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "If the credentials are correct the server will return a JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/token"
+                                },
+                                "example": {
+                                    "token": "al3e1A92ndx0b1hzs9rjk4sl56389drj3uj4a9r"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "summary": "User registration",
+                "description": "This route is responsible for register users",
+                "tags": [
+                    "Authentication"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/signup"
+                            },
+                            "example": {
+                                    "name": "John Native",
+                                    "email": "john@mail.com",
+                                    "password": "native123"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad request because invalid characters were entered or the email is already registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/error_obj"
+                                },
+                                "example": {
+                                    "error": {
+                                        "email": {
+                                            "msg": "Invalid email"
+                                        },
+                                        "password": {
+                                            "msg": "Password must be at least 4 characters"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "If the data is valid, the user will be registered and the API will return a JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/token"
+                                },
+                                "example": {
+                                    "token": "al3e1A92ndx0b1hzs9rjk4sl56389drj3uj4a9r"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions": {
+            "get": {
+                "summary": "Get all user transactions",
+                "description": "This route is responsible for get all user transactions",
+                "tags": [
+                    "Transactions"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["ASC", "DESC"],
+                            "default": "DESC"
+                        },
+                        "required": false,
+                        "description": "Select if the transactions come with asc or desc sort"
+                    }
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "401": {
+                        "description": "Returns a status of unauthorized if the token is not sent or is invalid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/not_authorized"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "If the token is valid, the server returns all user transactions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/get_transactions"
+                                },
+                                "example": {
+                                    "user_name": "Paul Mathew",
+                                    "user_transactions": [
+                                        {
+                                            "id": "56c2a5be-099c-471c-8679-4b2e857edac4",
+                                            "name": "Amazon Prime subscription",
+                                            "value": -13,
+                                            "date": "2019-06-11T05:22:00.000Z"
+                                        },
+                                        {
+                                            "id": "4r2e857gdac4-327c-829c-4022-56c2a5be",
+                                            "name": "Stock investment profit",
+                                            "value": 97,
+                                            "date": "2012-03-14T06:23:00.000Z"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add transactions",
+                "description": "This route is responsible for add transactions",
+                "tags": [
+                    "Transactions"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/add_transaction"
+                            },
+                            "example": {
+                                "value": {
+                                    "name": "Google Play Gift Card",
+                                    "value": -13.90,
+                                    "date": "2022-02-13 21:29:00"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "description": "Returns an error because the submitted data is incomplete or invalid. In the response body you can see more details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/error_obj"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns a status of unauthorized if the token is not sent or is invalid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/not_authorized"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "If the data is valid, the transaction will be added and returned in the response body",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/added_transactions"
+                                },
+                                "example": {
+                                    "new_transaction": {
+                                        "id": "55g1a53e-099c-471c-8679-432ea57edac4",
+                                        "name": "Spotify Premium",
+                                        "value": -15,
+                                        "date": "2021-04-17T13:23:00.000Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/{id}": {
+            "put": {
+                "summary": "Edit a transaction",
+                "description": "This route is responsible for edit a transaction by id",
+                "tags": [
+                    "Transactions"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "description": "It is not mandatory to send all transaction properties, you can send only the one to be edited. See the example:",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/edit_transaction"
+                            },
+                            "example": {
+                                "value": {
+                                    "name": "Purchased books"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "description": "Returns an error because the submitted data is incomplete or invalid. In the response body you can see more details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/error_obj"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns a status of unauthorized if the token is not sent, if it is invalid, or if the user does not have permission to update this transaction",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/not_authorized"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "If the data is valid, the transaction will be edited and a success message will be returned in the response body",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/sucess"
+                                },
+                                "example": {
+                                    "msg": "Successfully updated"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a transaction",
+                "description": "This route is responsible for delete a transaction by id",
+                "tags": [
+                    "Transactions"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Returns an error status if the id is invalid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/error_obj"
+                                },
+                                "example": {
+                                    "error": {
+                                        "id": {
+                                            "msg": "Invalid id"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns a status of unauthorized if the token is not sent, if it is invalid, or if the user does not have permission to delete this transaction",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/not_authorized"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "If the id is valid and the user has permission to delete this transaction, then the transaction will be deleted and a success message will be returned in the response body.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/sucess"
+                                },
+                                "example": {
+                                    "msg": "Successfully deleted"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "signin": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "error_obj": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "error_location": {
+                                "type": "object",
+                                "properties": {
+                                    "msg": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "signup": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "token": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    }
+                }
+            },
+            "not_authorized": {
+                "type": "object",
+                "properties": {
+                    "notallowed": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "get_transactions": {
+                "type": "object",
+                "properties": {
+                    "user_name": {
+                        "type": "string"
+                    },
+                    "user_transactions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "number"
+                                },
+                                "date": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "add_transaction": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    },
+                    "date": {
+                        "type": "string"
+                    }
+                }
+            },
+            "added_transactions": {
+                "type": "object",
+                "properties": {
+                    "new_transaction": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                            "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "number"
+                            },
+                            "date": {
+                                "type": "string"
+                            }
+                        }
+                    } 
+                }
+            },
+            "edit_transaction": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    },
+                    "date": {
+                        "type": "string"
+                    }
+                }
+            },
+            "sucess": {
+                "type": "object",
+                "properties": {
+                    "msg": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
