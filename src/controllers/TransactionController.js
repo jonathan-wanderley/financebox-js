@@ -42,7 +42,7 @@ module.exports = {
         const { name, value, date} = data;
 
         if(!name || !value || !date) {
-            return res.status(400).json({error: "Incomplete or invalid data"})
+            return res.status(400).json({error:{data:{ msg: "Incomplete or invalid data" }}});
          }
 
         const newTransaction = await Transaction.create({
@@ -72,19 +72,19 @@ module.exports = {
         const { id } = req.params;
 
         if(!id) {
-            return res.status(400).json({error: "Invalid id"});
+            return res.status(400).json({error:{id:{ msg: "Invalid id" }}});
         }
 
         const transaction = await Transaction.findByPk(id);
         if(!transaction) {
-            return res.status(400).json({error: "Invalid id"});
+            return res.status(400).json({error:{id:{ msg:"Invalid id" }}});
         }
         if(transaction.userid != req.userId) {
-            return res.status(401).json({error: "You are not allowed to change this transaction"});
+            return res.status(401).json({notallowed: true});
         };
 
         if(!name && !value && !date) {
-            return res.status(400).json({error: "You sent empty data"});
+            return res.status(400).json({error:{data:{ msg: "You sent empty data" }}});
         }
 
         if(name) { transaction.name = name }
@@ -99,15 +99,15 @@ module.exports = {
         const { id } = req.params;
 
         if(!id) {
-            return res.status(400).json({error: "Invalid id"});
+            return res.status(400).json({error:{id:{ msg:"Invalid id" }}});
         }
 
         const transaction = await Transaction.findByPk(id);
         if(!transaction) {
-            return res.status(400).json({error: "Invalid id"});
+            return res.status(400).json({error:{id:{ msg:"Invalid id" }}});
         }
         if(transaction.userid != req.userId) {
-            return res.status(401).json({error: "You are not allowed to delete this transaction"});
+            return res.status(401).json({notallowed: true});
         };
 
         await transaction.destroy();

@@ -6,14 +6,14 @@ module.exports = {
             trim: true,
             matches: {
                 options: [/^[A-Za-z]+$/],
-                errorMessage: "Invalid name. Only letters are allowed"
+                errorMessage: "Invalid name, only letters are allowed"
             },
             isLength: {
                 options: {
                     min: 2
                 }
             },
-            errorMessage: 'Invalid name. Only letters are allowed'
+            errorMessage: 'Invalid name, only letters are allowed'
         },
         email: {
             isEmail: true,

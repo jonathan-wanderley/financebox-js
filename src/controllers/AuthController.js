@@ -24,12 +24,12 @@ module.exports = {
 
         const userFoundByEmail = await User.findOne({where: { email: email }});
         if(!userFoundByEmail) {
-            return res.status(409).json({error:{email:{ msg:"Incorrect email and/or password"}}});
+            return res.status(401).json({error:{login:{ msg:"Incorrect email and/or password"}}});
         }
 
         const isValidPassword = await bcrypt.compare(password, userFoundByEmail.password);
         if(!isValidPassword) {
-            return res.status(409).json({error:{email:{ msg:"Incorrect email and/or password"}}});
+            return res.status(401).json({error:{login:{ msg:"Incorrect email and/or password"}}});
         }
 
         const token = jwt.sign({
@@ -43,7 +43,7 @@ module.exports = {
 
         const errors = customValidationResult(req);
         if(!errors.isEmpty()) {
-            return res.status(409).json({error: errors.mapped()}); 
+            return res.status(400).json({error: errors.mapped()}); 
         }
 
         const data = matchedData(req);
@@ -51,7 +51,7 @@ module.exports = {
 
         const userFoundByEmail = await User.findOne({ where: { email: email } });
         if(userFoundByEmail) {
-            return res.status(409).json({error:{email:{ msg:"This user is already registered" }}});
+            return res.status(400).json({error:{email:{ msg:"This user is already registered" }}});
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
