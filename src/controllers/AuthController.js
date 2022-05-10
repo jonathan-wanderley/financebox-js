@@ -1,7 +1,4 @@
-require('dotenv').config();
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const UserService = require('../services/UserService');
 const { validationResult, matchedData } = require('express-validator');
 
 const customValidationResult = validationResult.withDefaults({
@@ -19,54 +16,31 @@ module.exports = {
             return res.status(400).json({error: errors.mapped()});
         }
 
-        const data = matchedData(req);
-        const { email, password } = data;
+        const { email, password } = matchedData(req);
 
-        const userFoundByEmail = await User.findOne({where: { email: email }});
-        if(!userFoundByEmail) {
-            return res.status(401).json({error:{login:{ msg:"Incorrect email and/or password"}}});
+        const loginResult = await UserService.loginUser(email, password);
+
+        if(loginResult instanceof Error) {
+            const error = await JSON.parse(loginResult.message)
+            res.status(401).json(error)
         }
 
-        const isValidPassword = await bcrypt.compare(password, userFoundByEmail.password);
-        if(!isValidPassword) {
-            return res.status(401).json({error:{login:{ msg:"Incorrect email and/or password"}}});
-        }
-
-        const token = jwt.sign({
-            id: userFoundByEmail.id,
-            name: userFoundByEmail.name
-        }, process.env.JWT_SECRET,{ expiresIn: '3d' });
-
-        res.json({ token });
+        return res.json({ token: loginResult });
     },
     signup: async (req, res) => {
-
         const errors = customValidationResult(req);
         if(!errors.isEmpty()) {
             return res.status(400).json({error: errors.mapped()}); 
         }
+        const { name, email, password } = matchedData(req);
 
-        const data = matchedData(req);
-        const { name, email, password } = data;
-
-        const userFoundByEmail = await User.findOne({ where: { email: email } });
-        if(userFoundByEmail) {
-            return res.status(400).json({error:{email:{ msg:"This user is already registered" }}});
+        const result = await UserService.createUser(name, email, password);
+        
+        if(result instanceof Error) {
+            const error = await JSON.parse(result.message);
+            return res.status(400).json(error);
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
-
-        const newUser = await User.create({
-            name: name,
-            email: email,
-            password: passwordHash
-        });
-
-        const token = jwt.sign({
-            id: newUser.id,
-            name: newUser.name
-        }, process.env.JWT_SECRET, { expiresIn: '3d' });
-
-        res.status(201).json({ token });
+        return res.status(201).json({ token: result });
     }
 }
