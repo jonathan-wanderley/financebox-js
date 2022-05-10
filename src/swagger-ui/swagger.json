@@ -2,19 +2,12 @@
     "openapi": "3.0.0",
     "info": {
         "title": "FinanceBox API",
-        "description": "Um sistema de organização de finanças",
-        "termsOfService": "http://localhost:3000/terms",
+        "description": "A finance organization system",
         "contact": {
             "email": "jonathan.wpc@gmail.com"
         },
         "version": "1.0.0"
     },
-    "servers": [
-        {
-            "url": "http://localhost:3000/",
-            "description": "FinanceBox API"
-        }
-    ],
     "paths": {
         "/signin": {
             "post": {
