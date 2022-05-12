@@ -69,6 +69,6 @@ module.exports = {
             return res.status(error.code).json(error.msg);
         }
 
-        res.json({ msg: "Successfully deleted" })
+        res.status(204).json({ });
     }
 }

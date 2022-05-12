@@ -80,7 +80,15 @@ module.exports = {
         if(date) { transaction.date = date }
 
         await transaction.save();
-        return { msg: "Successfully updated" }
+
+        const transactionObj = {
+            id: transaction.id,
+            name: transaction.name,
+            value: transaction.value,
+            date: transaction.date
+        }
+
+        return transactionObj
     },
     async delete (transactionId, userId) {
         if(!transactionId) {

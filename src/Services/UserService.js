@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-    async findByEmail (email) { 
+    async findByEmail(email) { 
         return await User.findOne({ where: { email: email }});
     },
     async matchPassword(passwordText, encrypted) {
@@ -17,7 +17,7 @@ module.exports = {
         },
         process.env.JWT_SECRET, { expiresIn: '3d' });
     },
-    async createUser (name, email, password) {
+    async createUser(name, email, password) {
         const hasUser = await User.findOne({ where: { email: email }});
         if(hasUser) {
             const error = JSON.stringify({error:{email:{ msg:"This email is already registered" }}})
@@ -33,7 +33,12 @@ module.exports = {
         });
 
         const token = await this.generateToken(newUser.id, newUser.name);
-        return token;
+        return {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            token
+        };
     },
     async loginUser(email, password) {
         const hasUser = await this.findByEmail(email);
@@ -52,5 +57,8 @@ module.exports = {
         const token = await this.generateToken(hasUser.id, hasUser.name);
         
         return token;
+    },
+    async all() {
+        return await User.findAll();
     }
 }
